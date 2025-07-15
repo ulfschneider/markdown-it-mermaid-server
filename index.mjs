@@ -10,6 +10,7 @@ let settings = {
   outputFolder: "mermaid",
   renderPath: "/mermaid/",
   chartFormat: "svg",
+  imageAttributes: [],
   mermaidConfig: {},
 };
 
@@ -87,7 +88,7 @@ function mermaidChart(chartDefinition) {
       },
     );
     const chartTitle = extractChartTitle(chartDefinition);
-    return `<figure class="mermaid"><img src=\"${makeUrlPath(chartId + "." + settings.chartFormat)}\"/>${chartTitle ? `<figcaption>${chartTitle}</figcaption>` : ""}</figure>`;
+    return `<figure class="mermaid"><img src=\"${makeUrlPath(chartId + "." + settings.chartFormat)}\"${settings.imageAttributes.length ? " " + settings.imageAttributes.join(" ") : ""}/>${chartTitle ? `<figcaption>${chartTitle}</figcaption>` : ""}</figure>`;
   } catch ({ str, hash }) {
     console.error(
       chalk.red(`Failure rendering mermaid chart ${chartDefinition}`),
