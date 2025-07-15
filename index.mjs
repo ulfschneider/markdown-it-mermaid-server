@@ -1,7 +1,8 @@
 import * as fs from "node:fs";
 import path from "node:path";
 import { execSync } from "node:child_process";
-import { nanoid } from "nanoid";
+import { customAlphabet } from "nanoid";
+const nanoid = customAlphabet("0123456789abcdefghijklmnopqrst", 12);
 import chalk from "chalk";
 import pkg from "./package.json" with { type: "json" };
 
