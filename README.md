@@ -26,8 +26,8 @@ const markdownItMermaidOptions = {
   workingFolder: "mermaidTmp",
   outputFolder: "mermaid",
   renderPath: "/mermaid/",
-  chartFormat: "svg",
   imageAttributes: [],
+  useDataUri: false
   mermaidConfig: {},
 };
 
@@ -42,8 +42,8 @@ md.use(markdownItMermaidServer, markdownItMermaidOptions)
 - `workingFolder`: A temporary folder to store the currently processed Mermaid diagram definition and the mermaidConfig object. **Add the folder to your `.gitignore` file, because it doesn´t require code versioning**. Default is `mermaidTmp`.
 - `outpoutFolder`: The folder to store the created diagram images to be referenced in the resulting HTML documents. Default is `mermaid`. Because with every build the created diagram images will receive a new name, **the output folder should be part of your .gitignore file**.
 - `renderPath`: The path to reference the created diagrams in the resulting HTML. In the following example, the default renderPath `/mermaid/` is used to access the Mermaid SVG diagram: `<img src="/mermaid/Q8jScdyns6K32zkmj9SD4.svg"/>`
-- `chartFormat`: The format of the resulting Mermaid chart. Default is `svg`, other supported formats are `png` and `pdf`.
 - `imageAttributes`: A string array with HTML attributes to add to the resulting HTML image tag.
+- `useDataUri`: A boolean value to indicate if the diagram should be referenced to with a data uri, like `<img src="data:image/svg+xml;base64,PHN2ZyBhcm...`. By default, this settings is `false`.
 - `mermaidConfig`: The Mermaid [configuration JSON](https://mermaid.js.org/config/schema-docs/config.html) object.
 
 ## Markdown

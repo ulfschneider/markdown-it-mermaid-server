@@ -4,12 +4,13 @@ import { execSync } from "node:child_process";
 import chalk from "chalk";
 import pkg from "./package.json" with { type: "json" };
 import stringHash from "@sindresorhus/string-hash";
+import DataUriSync from "datauri";
 
 let settings = {
   workingFolder: "mermaidTmp",
   outputFolder: "mermaid",
   renderPath: "/mermaid/",
-  chartFormat: "svg",
+  useDataUri: false,
   imageAttributes: [],
   mermaidConfig: {},
 };
@@ -40,13 +41,8 @@ function makeFolderPath(folderPath) {
   return path.normalize(folderPath);
 }
 
-function makeDiagramFormat(format) {
-  return format.replaceAll(".", "");
-}
-
 function initialize(options) {
   settings = Object.assign(settings, options);
-  settings.chartFormat = makeDiagramFormat(settings.chartFormat || "svg");
   settings.workingFolder = makeFolderPath(settings.workingFolder);
   settings.outputFolder = makeFolderPath(settings.outputFolder);
   printSettings();
@@ -80,15 +76,26 @@ function mermaidChart(chartDefinition) {
     fs.writeFileSync(`${settings.workingFolder}/chart.mmd`, chartDefinition);
 
     execSync(
-      `npx -p @mermaid-js/mermaid-cli mmdc -q --svgId ${chartId} --outputFormat ${settings.chartFormat} --input ${makeWorkingFilePath("chart.mmd")} --output ${makeOutputFilePath(chartId + "." + settings.chartFormat)} --configFile ${makeWorkingFilePath("mermaidConfig.json")}`,
+      `npx -p @mermaid-js/mermaid-cli mmdc -q --input ${makeWorkingFilePath("chart.mmd")} --output ${makeOutputFilePath(chartId + ".svg")} --configFile ${makeWorkingFilePath("mermaidConfig.json")}`,
       {
         cwd: "./",
         encoding: "utf-8",
         stdio: "inherit",
       },
     );
+
     const chartTitle = extractChartTitle(chartDefinition);
-    return `<figure class="mermaid"><img src=\"${makeUrlPath(chartId + "." + settings.chartFormat)}\"${settings.imageAttributes.length ? " " + settings.imageAttributes.join(" ") : ""}/>${chartTitle ? `<figcaption>${chartTitle}</figcaption>` : ""}</figure>`;
+
+    if (settings.useDataUri) {
+      const chart = fs.readFileSync(
+        makeOutputFilePath(chartId + ".svg"),
+        "binary",
+      );
+      const chartBase64 = Buffer.from(chart, "binary").toString("base64");
+      return `<figure class="mermaid"><img src=\"data:image/svg+xml;base64,${chartBase64}\"${settings.imageAttributes.length ? " " + settings.imageAttributes.join(" ") : ""}/>${chartTitle ? `<figcaption>${chartTitle}</figcaption>` : ""}</figure>`;
+    } else {
+      return `<figure class="mermaid"><img src=\"${makeUrlPath(chartId + ".svg")}\"${settings.imageAttributes.length ? " " + settings.imageAttributes.join(" ") : ""}/>${chartTitle ? `<figcaption>${chartTitle}</figcaption>` : ""}</figure>`;
+    }
   } catch ({ str, hash }) {
     console.error(
       chalk.red(`Failure rendering mermaid chart ${chartDefinition}`),
