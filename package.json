@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "markdown-it-mermaid-server"
+    "url": "https://github.com/ulfschneider/markdown-it-mermaid-server"
   },
   "keywords": [
     "markdown",
