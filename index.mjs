@@ -1,10 +1,9 @@
 import * as fs from "node:fs";
 import path from "node:path";
 import { execSync } from "node:child_process";
-import { customAlphabet } from "nanoid";
-const nanoid = customAlphabet("0123456789abcdefghijklmnopqrst", 12);
 import chalk from "chalk";
 import pkg from "./package.json" with { type: "json" };
+import stringHash from "@sindresorhus/string-hash";
 
 let settings = {
   workingFolder: "mermaidTmp",
@@ -75,7 +74,7 @@ function extractChartTitle(chartDefinition) {
 }
 
 function mermaidChart(chartDefinition) {
-  const chartId = nanoid();
+  const chartId = stringHash(chartDefinition);
 
   try {
     fs.writeFileSync(`${settings.workingFolder}/chart.mmd`, chartDefinition);
