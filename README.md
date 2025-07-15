@@ -11,7 +11,7 @@ It´s possible to provide a `mermaidConfig` object in the options with any of th
 ## Install
 
 - `npm install markdown-it-mermaid-server`
-- `npm install --save-peer @mermaid-js/mermaid-cli`
+- `npm install @mermaid-js/mermaid-cli`
 
 ## Use
 
@@ -35,8 +35,11 @@ md.use(markdownItMermaidServer, markdownItMermaidOptions)
 
 ## Options
 
+> [!CAUTION]
+> Use the `workingFolder` and the `outputFolder` exclusively for markdown-it-mermaid-server and not for other content and have those folders part of your `.gitignore` file.
+
 - `workingFolder`: A temporary folder to store the currently processed mermaid diagram definition and the mermaidConfig object. **Add the folder to your `.gitignore` file, because it doesn´t require code versioning**. Default is `mermaidTmp`.
-- `outpoutFolder`: The folder to store the created diagram images to be referenced in the resulting HTML documents. Default is `mermaid`.
+- `outpoutFolder`: The folder to store the created diagram images to be referenced in the resulting HTML documents. Default is `mermaid`. Because with every build the created diagram images will receive a new name, **the output folder should be part of your .gitignore file**.
 - `renderPath`: The path to reference the created diagrams in the resulting HTML. In the following example, the default renderPath `/mermaid/` is used to access the mermaid SVG diagram: `<img src="/mermaid/Q8jScdyns6K32zkmj9SD4.svg"/>`
 - `chartFormat`: The format of the resulting mermaid chart. Default is `svg`, other supported formats are `png` and `pdf`.
 - `mermaidConfig`: The mermaid [configuration JSON](https://mermaid.js.org/config/schema-docs/config.html) object.
