@@ -33,19 +33,10 @@ const markdownItMermaidOptions = {
 md.use(markdownItMermaidServer, markdownItMermaidOptions)
 ```
 
-Explanation of the above options:
+## Options
 
-`workingFolder`
-: A temporary folder to store the currently processed mermaid diagram definition and the mermaidConfig object. **Add the folder to your `.gitignore` file, because it doesn´t require code versioning. Default is `mermaidTmp`.
-
-`outpoutFolder`
-: The folder to store the created diagram images to be referenced in the resulting HTML documents. Default is `mermaid`.
-
-`renderPath`
-: The path to reference the created diagrams in the resulting HTML. In the following example, the default renderPath `/mermaid/` is used to access the mermaid SVG diagram: `<img src="/mermaid/Q8jScdyns6K32zkmj9SD4.svg"/>`
-
-`chartFormat`
-: The format of the resulting mermaid chart. Default is `svg`, other supported formats are `png` and `pdf`.
-
-`mermaidConfig`
-: The mermaid [configuration JSON](https://mermaid.js.org/config/schema-docs/config.html) object.
+- `workingFolder`: A temporary folder to store the currently processed mermaid diagram definition and the mermaidConfig object. **Add the folder to your `.gitignore` file, because it doesn´t require code versioning**. Default is `mermaidTmp`.
+- `outpoutFolder`: The folder to store the created diagram images to be referenced in the resulting HTML documents. Default is `mermaid`.
+- `renderPath`: The path to reference the created diagrams in the resulting HTML. In the following example, the default renderPath `/mermaid/` is used to access the mermaid SVG diagram: `<img src="/mermaid/Q8jScdyns6K32zkmj9SD4.svg"/>`
+- `chartFormat`: The format of the resulting mermaid chart. Default is `svg`, other supported formats are `png` and `pdf`.
+- `mermaidConfig`: The mermaid [configuration JSON](https://mermaid.js.org/config/schema-docs/config.html) object.
