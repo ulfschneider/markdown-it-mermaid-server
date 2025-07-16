@@ -39,6 +39,7 @@ const markdownItMermaidOptions = {
   useDataUri: false,
   backgroundColor: "white",
   mermaidConfig: {},
+  puppeteerConfig: {}
 };
 
 md.use(markdownItMermaidServer, markdownItMermaidOptions)
@@ -50,12 +51,13 @@ md.use(markdownItMermaidServer, markdownItMermaidOptions)
 > Use the `workingFolder` and the `outputFolder` exclusively for markdown-it-mermaid-server and not for other content. It also makes sense to have those folders part of your `.gitignore` file to avoid having the generated content part of your code versioning.
 
 - `workingFolder`: A temporary folder to store the currently processed Mermaid diagram definition and the mermaidConfig object. **Add the folder to your `.gitignore` file, because it doesn´t require code versioning**. Default is `mermaidTmp`.
-- `outpoutFolder`: The folder to store the created diagram images to be referenced in the resulting HTML documents. Default is `mermaid`. Because with every build the created diagram images will receive a new name, **the output folder should be part of your .gitignore file**.
-- `renderPath`: The path to reference the created diagrams in the resulting HTML. In the following example, the default renderPath `/mermaid/` is used to access the Mermaid SVG diagram: `<img src="/mermaid/Q8jScdyns6K32zkmj9SD4.svg"/>`
+- `outpoutFolder`: The folder to store the created diagram images to be referenced in the resulting HTML documents. It is only created and used when `useDataUri == false`. Default name is `mermaid`. Because with every build the created diagram images will receive a new name, **the output folder should be part of your .gitignore file**.
+- `renderPath`: The path to reference the created diagrams in the resulting HTML. It is only created and used when `useDataUri == false`. In the following example, the default renderPath `/mermaid/` is used to access the Mermaid SVG diagram: `<img src="/mermaid/Q8jScdyns6K32zkmj9SD4.svg"/>`
 - `imageAttributes`: A string array with HTML attributes to add to the resulting HTML image tag.
-- `useDataUri`: A boolean value to indicate if the diagram should be referenced with a data uri, like `<img src="data:image/svg+xml;base64,PHN2ZyBhcm...`. By default, this settings is `false`.
+- `useDataUri`: A boolean value to indicate if the diagram should be referenced with a data URI, like `<img src="data:image/svg+xml;base64,PHN2ZyBhcm...`. By default, this settings is `false`.
 - `backgroundColor`: The background for the SVG diagrams. Default is `white`.
 - `mermaidConfig`: The Mermaid [configuration JSON](https://mermaid.js.org/config/schema-docs/config.html) object.
+- `puppeteerConfig`: The Puppeteer [configuration JSON](https://pptr.dev/guides/configuration) object.
 
 ## Markdown
 
