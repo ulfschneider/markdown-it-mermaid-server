@@ -11,7 +11,7 @@ const TEST = `\`\`\`mermaid
 
 \`\`\``;
 
-md.use(markdownItMermaid);
+md.use(markdownItMermaid, { useDataUri: true });
 
 const result = md.render(TEST);
 console.log(result);

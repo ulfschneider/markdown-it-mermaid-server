@@ -1,17 +1,26 @@
 # markdown-it-mermaid-server
 
-A markdown-it plugin to render Mermaid diagrams on the server. The resulting diagrams will be referenced in the resulting HTML documents without sending any Mermaid code to the browser client. markdown-it-mermaid-server is perfectly suited for Static Site Generators (SSG), like for example [11ty](https://www.11ty.dev).
+A markdown-it plugin to transform textual [Mermaid](https://mermaid.js.org) diagram definitions into SVG images.
 
-markdown-it-mermaid-server has a peer dependency to the [@mermaid-js/mermaid-cli](https://www.npmjs.com/package/@mermaid-js/mermaid-cli/) package. When using markdown-it-mermaid-server, you have to install the peer dependency by yourself to your project, which means you can update it at any time to stay up to date with the most current @mermaid-js/mermaid-cli package.
+markdown-it-mermaid-server runs on the server. The produced SVG images will be referenced in the HTML documents without sending any Mermaid code to the browser client. The plugin is perfectly suited for the build process of Static Site Generators (SSG), like for example [11ty](https://www.11ty.dev).
 
-While the creation of Mermaid diagrams on the server is an async process, the markdown-it-mermaid-server plugin can still be used in sync-functioning markdown-it render process.
+The transformed images are inserted into `figure` HTML tags, like so:
 
-It´s possible to provide a `mermaidConfig` object in the options with any of the configuration settings of Mermaid.
+```html
+<figure class="mermaid"><img src="/mermaid/16f17fbc.svg"/></figure>
+```
+
+You can configure to insert the image as a data URI, like:
+
+```html
+<figure class="mermaid"><img src="data:image/svg+xml;base64,PHN2ZyBhcmlhLXJvbGVk..." /></figure>
+```
 
 ## Install
 
-- `npm install markdown-it-mermaid-server`
-- `npm install @mermaid-js/mermaid-cli`
+markdown-it-mermaid-server has a peer dependency to the [@mermaid-js/mermaid-cli](https://www.npmjs.com/package/@mermaid-js/mermaid-cli/) package. You have to install the peer dependency by yourself to your project, which means you can update it at any time to stay up to date with the most current @mermaid-js/mermaid-cli package.
+
+`npm install @mermaid-js/mermaid-cli markdown-it-mermaid-server`
 
 ## Use
 
@@ -27,7 +36,8 @@ const markdownItMermaidOptions = {
   outputFolder: "mermaid",
   renderPath: "/mermaid/",
   imageAttributes: [],
-  useDataUri: false
+  useDataUri: false,
+  backgroundColor: "white",
   mermaidConfig: {},
 };
 
@@ -37,13 +47,14 @@ md.use(markdownItMermaidServer, markdownItMermaidOptions)
 ## Options
 
 > [!CAUTION]
-> Use the `workingFolder` and the `outputFolder` exclusively for markdown-it-mermaid-server and not for other content and have those folders part of your `.gitignore` file.
+> Use the `workingFolder` and the `outputFolder` exclusively for markdown-it-mermaid-server and not for other content. It also makes sense to have those folders part of your `.gitignore` file to avoid having the generated content part of your code versioning.
 
 - `workingFolder`: A temporary folder to store the currently processed Mermaid diagram definition and the mermaidConfig object. **Add the folder to your `.gitignore` file, because it doesn´t require code versioning**. Default is `mermaidTmp`.
 - `outpoutFolder`: The folder to store the created diagram images to be referenced in the resulting HTML documents. Default is `mermaid`. Because with every build the created diagram images will receive a new name, **the output folder should be part of your .gitignore file**.
 - `renderPath`: The path to reference the created diagrams in the resulting HTML. In the following example, the default renderPath `/mermaid/` is used to access the Mermaid SVG diagram: `<img src="/mermaid/Q8jScdyns6K32zkmj9SD4.svg"/>`
 - `imageAttributes`: A string array with HTML attributes to add to the resulting HTML image tag.
-- `useDataUri`: A boolean value to indicate if the diagram should be referenced to with a data uri, like `<img src="data:image/svg+xml;base64,PHN2ZyBhcm...`. By default, this settings is `false`.
+- `useDataUri`: A boolean value to indicate if the diagram should be referenced with a data uri, like `<img src="data:image/svg+xml;base64,PHN2ZyBhcm...`. By default, this settings is `false`.
+- `backgroundColor`: The background for the SVG diagrams. Default is `white`.
 - `mermaidConfig`: The Mermaid [configuration JSON](https://mermaid.js.org/config/schema-docs/config.html) object.
 
 ## Markdown

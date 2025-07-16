@@ -10,6 +10,7 @@ let settings = {
   outputFolder: "mermaid",
   renderPath: "/mermaid/",
   useDataUri: false,
+  backgroundColor: "white",
   imageAttributes: [],
   mermaidConfig: {},
 };
@@ -75,7 +76,7 @@ function mermaidChart(chartDefinition) {
     fs.writeFileSync(`${settings.workingFolder}/chart.mmd`, chartDefinition);
 
     execSync(
-      `npx -p @mermaid-js/mermaid-cli mmdc -q --input ${makeWorkingFilePath("chart.mmd")} --output ${makeOutputFilePath(chartId + ".svg")} --configFile ${makeWorkingFilePath("mermaidConfig.json")}`,
+      `npx -p @mermaid-js/mermaid-cli mmdc -q --backgroundColor ${settings.backgroundColor} --input ${makeWorkingFilePath("chart.mmd")} --output ${makeOutputFilePath(chartId + ".svg")} --configFile ${makeWorkingFilePath("mermaidConfig.json")}`,
       {
         cwd: "./",
         encoding: "utf-8",
@@ -95,11 +96,11 @@ function mermaidChart(chartDefinition) {
     } else {
       return `<figure class="mermaid"><img src=\"${makeUrlPath(chartId + ".svg")}\"${settings.imageAttributes.length ? " " + settings.imageAttributes.join(" ") : ""}/>${chartTitle ? `<figcaption>${chartTitle}</figcaption>` : ""}</figure>`;
     }
-  } catch ({ str, hash }) {
+  } catch (err) {
     console.error(
       chalk.red(`Failure rendering mermaid chart ${chartDefinition}`),
     );
-    return `<pre>${str}</pre>`;
+    return `<pre>${chartDefinition}</pre>`;
   }
 }
 
