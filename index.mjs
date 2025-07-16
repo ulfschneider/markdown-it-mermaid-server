@@ -3,8 +3,7 @@ import path from "node:path";
 import { execSync } from "node:child_process";
 import chalk from "chalk";
 import pkg from "./package.json" with { type: "json" };
-import stringHash from "@sindresorhus/string-hash";
-import DataUriSync from "datauri";
+import hashSum from "hash-sum";
 
 let settings = {
   workingFolder: "mermaidTmp",
@@ -70,7 +69,7 @@ function extractChartTitle(chartDefinition) {
 }
 
 function mermaidChart(chartDefinition) {
-  const chartId = stringHash(chartDefinition);
+  const chartId = hashSum(chartDefinition);
 
   try {
     fs.writeFileSync(`${settings.workingFolder}/chart.mmd`, chartDefinition);
