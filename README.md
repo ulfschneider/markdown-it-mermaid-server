@@ -17,7 +17,7 @@ B --> C["Option A"] & D["Option B"]
 and get the chart, wrapped into a `figure` tag:
 
 ```html
-<figure class="mermaid"><svg aria-roledescription="flowchart-v2" role="graphics-document document" viewBox="0 0 410.96875 174" ..></svg></figure>
+<figure class="mermaid"><svg aria-roledescription="flowchart-v2" role="graphics-document document" viewBox="0 0 410.96875 174" ...></svg></figure>
 ```
 
 
