@@ -74,7 +74,7 @@ md.use(markdownItMermaidServer, markdownItMermaidOptions)
 
 In your Markdown, describe the Mermaid chart within a fenced codeblock, introduced with the `mermaid` keyword, like so:
 
-<pre>
+~~~markdown
 ```mermaid
 quadrantChart
 title Reach and engagement of campaigns
@@ -91,7 +91,7 @@ Campaign D: [0.78, 0.34]
 Campaign E: [0.40, 0.34]
 Campaign F: [0.35, 0.78]
 ```
-</pre>
+~~~
 
 The fenced codeblock will be replaced by a`figure` tag containing the diagram:
 
