@@ -2,9 +2,9 @@
 
 A markdown-it plugin to transform textual [Mermaid](https://mermaid.js.org) diagram definitions into SVG images.
 
-markdown-it-mermaid-server runs on the server. The produced SVG images will be referenced in the HTML documents without sending any Mermaid code to the browser client. The plugin is perfectly suited for the build process of Static Site Generators (SSG), like for example [11ty](https://www.11ty.dev).
+markdown-it-mermaid-server runs on the server as part of the markdown-it transformation. The produced SVG images will be referenced in the resulting HTML documents without the need of any Mermaid code running on the browser client. The plugin is perfectly suited for the build process of Static Site Generators (SSG), like for example [11ty](https://www.11ty.dev).
 
-The transformed images are inserted into `figure` HTML tags, like so:
+The created images are inserted into `figure` HTML tags, for example:
 
 ```html
 <figure class="mermaid"><img src="/mermaid/16f17fbc.svg"/></figure>
@@ -16,9 +16,12 @@ You can configure to insert the image as a data URI, like:
 <figure class="mermaid"><img src="data:image/svg+xml;base64,PHN2ZyBhcmlhLXJvbGVk..." /></figure>
 ```
 
+When the diagram has a title, the title will be added as a `figcaption` to the `figure`.
+
+
 ## Install
 
-markdown-it-mermaid-server has a peer dependency to the [@mermaid-js/mermaid-cli](https://www.npmjs.com/package/@mermaid-js/mermaid-cli/) package. You have to install the peer dependency by yourself to your project, which means you can update it at any time to stay up to date with the most current @mermaid-js/mermaid-cli package.
+markdown-it-mermaid-server has a peer dependency to the [@mermaid-js/mermaid-cli](https://www.npmjs.com/package/@mermaid-js/mermaid-cli/) package. You have to add the peer dependency by yourself to your project, which allows you to update it at any time to stay up to date with the most current @mermaid-js/mermaid-cli package. To make a complete install in one go, issue the command:
 
 `npm install @mermaid-js/mermaid-cli markdown-it-mermaid-server`
 
@@ -38,8 +41,12 @@ const markdownItMermaidOptions = {
   imageAttributes: [],
   useDataUri: false,
   backgroundColor: "white",
+  themeCSS: "",
   mermaidConfig: {},
-  puppeteerConfig: {}
+  puppeteerConfig: {},
+  clearWorkingFolder: false,
+  clearOutputFolder: false,
+  verbose: false
 };
 
 md.use(markdownItMermaidServer, markdownItMermaidOptions)
@@ -48,20 +55,24 @@ md.use(markdownItMermaidServer, markdownItMermaidOptions)
 ## Options
 
 > [!CAUTION]
-> Use the `workingFolder` and the `outputFolder` exclusively for markdown-it-mermaid-server and not for other content. It also makes sense to have those folders part of your `.gitignore` file to avoid having the generated content part of your code versioning.
+> Use the `workingFolder` and the `outputFolder` exclusively for markdown-it-mermaid-server and not for other content. It also makes sense to have those folders part of your `.gitignore` file to avoid having the generated content being part of your code versioning.
 
-- `workingFolder`: A temporary folder to store the currently processed Mermaid diagram definition and the mermaidConfig object. **Add the folder to your `.gitignore` file, because it doesn´t require code versioning**. Default is `mermaidTmp`.
-- `outpoutFolder`: The folder to store the created diagram images to be referenced in the resulting HTML documents. It is only created and used when `useDataUri == false`. Default name is `mermaid`. Because with every build the created diagram images will receive a new name, **the output folder should be part of your .gitignore file**.
-- `renderPath`: The path to reference the created diagrams in the resulting HTML. It is only created and used when `useDataUri == false`. In the following example, the default renderPath `/mermaid/` is used to access the Mermaid SVG diagram: `<img src="/mermaid/Q8jScdyns6K32zkmj9SD4.svg"/>`
-- `imageAttributes`: A string array with HTML attributes to add to the resulting HTML image tag.
+- `workingFolder`: A temporary folder to used to transform the Mermaid diagram definitions to chart SVG images. **Add the folder to your `.gitignore` file, because it doesn´t require code versioning**. The default name of the folder is `mermaidTmp`.
+- `outpoutFolder`: The folder to store the created diagram images to be referenced in the resulting HTML documents. The folder is only created and used when `useDataUri == false`. The default name is `mermaid`. Because the contents of this folder are generated, **the output folder should be part of your `.gitignore` file to avoid having it in the code versioning**.
+- `renderPath`: The path to reference the created diagrams in the resulting HTML. It is only used when `useDataUri == false`. In the following example, the default renderPath `/mermaid/` is used to access the Mermaid SVG diagram: `<img src="/mermaid/16f17fbc.svg"/>`
+- `imageAttributes`: A string with HTML attributes to add to the resulting HTML image tag.
 - `useDataUri`: A boolean value to indicate if the diagram should be referenced with a data URI, like `<img src="data:image/svg+xml;base64,PHN2ZyBhcm...`. By default, this settings is `false`.
 - `backgroundColor`: The background for the SVG diagrams. Default is `white`.
+- `themeCSS`: A custom Mermaid theme CSS to style the resulting SVG diagrams.
 - `mermaidConfig`: The Mermaid [configuration JSON](https://mermaid.js.org/config/schema-docs/config.html) object.
 - `puppeteerConfig`: The Puppeteer [configuration JSON](https://pptr.dev/guides/configuration) object.
+- `verbose`: A value of `true` will activate detailed logging. Default is `false`.
+- `clearWorkingFolder`: A value of `true` will delete the working folder when initializing the plugin. Default is `false`.
+- `clearOutputFolder`: A value of `true` will delete the output folder when initializing the plugin. Default is `false`.
 
 ## Markdown
 
-Within your Markdown, describe the Mermaid chart within a fenced codeblock, introduced with the `mermaid` keyword, like so:
+In your Markdown, describe the Mermaid chart within a fenced codeblock, introduced with the `mermaid` keyword, like so:
 
 <pre>
 ```mermaid
@@ -81,3 +92,9 @@ Campaign E: [0.40, 0.34]
 Campaign F: [0.35, 0.78]
 ```
 </pre>
+
+The fenced codeblock will be replaced by a`figure` tag containing the diagram:
+
+```html
+<figure class="mermaid"><img src="/mermaid/16f17fbc.svg"/><figcaption>Reach and engagement of campaigns</figcaption></figure>
+```
