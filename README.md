@@ -1,6 +1,6 @@
 # markdown-it-mermaid-server
 
-A markdown-it plugin to transform textual [Mermaid](https://mermaid.js.org) diagram definitions into SVG images.
+A [markdown-it](https://github.com/markdown-it/markdown-it) plugin to transform textual [Mermaid](https://mermaid.js.org) diagram definitions into SVG images.
 
 markdown-it-mermaid-server runs on the server as part of the markdown-it transformation. The produced SVG images will be referenced in the Markdown-rendered HTML documents without the need of any Mermaid code running on the browser client. The plugin is perfectly suited for the build process of Static Site Generators (SSG), like for example [11ty](https://www.11ty.dev).
 
