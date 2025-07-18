@@ -85,5 +85,5 @@ flowchart LR
 The fenced codeblock will be replaced by a`figure` tag containing the diagram:
 
 ```html
-<figure class="mermaid"><img src="/mermaid/16f17fbc.svg"/><figcaption>Reach and engagement of campaigns</figcaption></figure>
+<figure class="mermaid"><img src="/mermaid/16f17fbc.svg"/></figure>
 ```
