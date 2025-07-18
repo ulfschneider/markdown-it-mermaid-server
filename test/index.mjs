@@ -4,6 +4,7 @@ const md = markdownit();
 
 const TEST = `\`\`\`mermaid
   sequenceDiagram
+      title "My sequence diagram"
       participant Alice
       participant Bob
       Bob->>Alice: Hi Alice
@@ -11,7 +12,7 @@ const TEST = `\`\`\`mermaid
 
 \`\`\``;
 
-md.use(markdownItMermaid, { useDataUri: true });
+md.use(markdownItMermaid, { useDataUri: false });
 
 const result = md.render(TEST);
 console.log(result);

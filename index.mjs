@@ -11,15 +11,23 @@ let settings = {
   renderPath: "/mermaid/",
   useDataUri: false,
   backgroundColor: "white",
-  imageAttributes: [],
+  themeCSS: "",
+  imageAttributes: "",
   mermaidConfig: {},
   puppeteerConfig: {},
+  clearWorkingFolder: false,
+  clearOutputFolder: false,
+  verbose: false,
 };
 
 function printSettings() {
-  console.log(
-    chalk.cyan(`${pkg.name} settings ` + JSON.stringify(settings, null, "  ")),
-  );
+  if (settings.verbose) {
+    console.log(
+      chalk.cyan(
+        `${pkg.name} settings ` + JSON.stringify(settings, null, "  "),
+      ),
+    );
+  }
 }
 
 function makeUrlPath(chartFileName) {
@@ -48,10 +56,12 @@ function initialize(options) {
   settings.outputFolder = makeFolderPath(settings.outputFolder);
   printSettings();
 
-  if (fs.existsSync(settings.workingFolder)) {
+  if (fs.existsSync(settings.workingFolder) && settings.clearWorkingFolder) {
     fs.rmSync(settings.workingFolder, { recursive: true, force: true });
   }
-  fs.mkdirSync(settings.workingFolder);
+  if (!fs.existsSync(settings.workingFolder)) {
+    fs.mkdirSync(settings.workingFolder);
+  }
   fs.writeFileSync(
     makeWorkingFilePath("mermaidConfig.json"),
     JSON.stringify(settings.mermaidConfig),
@@ -60,10 +70,11 @@ function initialize(options) {
     makeWorkingFilePath("puppeteerConfig.json"),
     JSON.stringify(settings.puppeteerConfig),
   );
-  if (fs.existsSync(settings.outputFolder)) {
+  fs.writeFileSync(makeWorkingFilePath("theme.css"), settings.themeCSS);
+  if (fs.existsSync(settings.outputFolder) && settings.clearOutputFolder) {
     fs.rmSync(settings.outputFolder, { recursive: true, force: true });
   }
-  if (!settings.useDataUri) {
+  if (!settings.useDataUri && !fs.existsSync(settings.outputFolder)) {
     fs.mkdirSync(settings.outputFolder);
   }
 }
@@ -72,7 +83,13 @@ function extractChartTitle(chartDefinition) {
   const title = /\n[ ]*title[ ]+(?<title>.*)\n/i;
   const result = chartDefinition.match(title);
   if (result) {
-    return result.groups.title;
+    const title = result.groups.title.trim();
+    //remove surrounding quotes
+    if (title.charAt(0) == '"' && title.charAt(title.length - 1) == '"') {
+      return title.substr(1, title.length - 2);
+    } else {
+      return title;
+    }
   }
 }
 
@@ -88,7 +105,7 @@ function prepareChartFile(chartDefinition, chartFileName) {
   if (!fs.existsSync(getChartFileLocation(chartFileName))) {
     fs.writeFileSync(`${settings.workingFolder}/chart.mmd`, chartDefinition);
     execSync(
-      `npx -p @mermaid-js/mermaid-cli mmdc -q --backgroundColor ${settings.backgroundColor} --input ${makeWorkingFilePath("chart.mmd")} --output ${getChartFileLocation(chartFileName)} --configFile ${makeWorkingFilePath("mermaidConfig.json")} --puppeteerConfigFile ${makeWorkingFilePath("puppeteerConfig.json")}`,
+      `npx -p @mermaid-js/mermaid-cli mmdc -q --backgroundColor ${settings.backgroundColor} --cssFile ${makeWorkingFilePath("theme.css")} --input ${makeWorkingFilePath("chart.mmd")} --output ${getChartFileLocation(chartFileName)} --configFile ${makeWorkingFilePath("mermaidConfig.json")} --puppeteerConfigFile ${makeWorkingFilePath("puppeteerConfig.json")}`,
       {
         cwd: "./",
         encoding: "utf-8",
@@ -112,9 +129,9 @@ function mermaidChart(chartDefinition) {
         "binary",
       );
       const chartBase64 = Buffer.from(chart, "binary").toString("base64");
-      return `<figure class="mermaid"><img src=\"data:image/svg+xml;base64,${chartBase64}\"${settings.imageAttributes.length ? " " + settings.imageAttributes.join(" ") : ""}/>${chartTitle ? `<figcaption>${chartTitle}</figcaption>` : ""}</figure>`;
+      return `<figure class="mermaid"><img src=\"data:image/svg+xml;base64,${chartBase64}\"${settings.imageAttributes ? " " + settings.imageAttributes : ""}/>${chartTitle ? `<figcaption>${chartTitle}</figcaption>` : ""}</figure>`;
     } else {
-      return `<figure class="mermaid"><img src=\"${makeUrlPath(chartFileName + ".svg")}\"${settings.imageAttributes.length ? " " + settings.imageAttributes.join(" ") : ""}/>${chartTitle ? `<figcaption>${chartTitle}</figcaption>` : ""}</figure>`;
+      return `<figure class="mermaid"><img src=\"${makeUrlPath(chartFileName + ".svg")}\"${settings.imageAttributes ? " " + settings.imageAttributes : ""}/>${chartTitle ? `<figcaption>${chartTitle}</figcaption>` : ""}</figure>`;
     }
   } catch (err) {
     console.error(
