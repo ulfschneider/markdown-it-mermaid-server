@@ -113,8 +113,6 @@ function mermaidChart(chartDefinition) {
     const chartMeta = extractMetaInformation(chartDefinition);
     prepareChartFile(chartMeta.chartDefinition);
 
-    console.log(chartMeta);
-
     let chart = fs
       .readFileSync(makeWorkingFilePath("chart.svg"), "binary")
       .toString();
