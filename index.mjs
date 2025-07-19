@@ -11,6 +11,7 @@ let settings = {
   themeCSS: "",
   mermaidConfig: {},
   puppeteerConfig: {},
+  throwOnError: false,
   verbose: false,
 };
 
@@ -94,11 +95,18 @@ function mermaidChart(chartDefinition) {
 
     return `<figure class="mermaid">${chart}${chartTitle ? `<figcaption>${chartTitle}</figcaption>` : ""}</figure>`;
   } catch (err) {
-    console.error(
-      chalk.red(`Failure rendering mermaid chart ${chartDefinition}`),
-      err,
-    );
-    return `<pre>${chartDefinition}</pre>`;
+    if (settings.throwOnError) {
+      console.error(
+        chalk.red(`Failure rendering mermaid chart ${chartDefinition}`),
+      );
+      throw err;
+    } else {
+      console.error(
+        chalk.red(`Failure rendering mermaid chart ${chartDefinition}`),
+        err,
+      );
+      return `<pre>${chartDefinition}</pre>`;
+    }
   }
 }
 

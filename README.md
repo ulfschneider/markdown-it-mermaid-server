@@ -23,9 +23,9 @@ and get the chart, wrapped into a `figure` tag:
 
 ## Install
 
-markdown-it-mermaid-server has a peer dependency to the [@mermaid-js/mermaid-cli](https://www.npmjs.com/package/@mermaid-js/mermaid-cli/) package. You have to add the peer dependency by yourself to your project, which allows you to update it at any time to stay up to date with the most current @mermaid-js/mermaid-cli package. To make a complete install in one go, issue the command:
+markdown-it-mermaid-server has a peer dependency to the [@mermaid-js/mermaid-cli](https://www.npmjs.com/package/@mermaid-js/mermaid-cli/) package. You have to add the peer dependency by yourself to your project, which allows you to update it at any time to stay up to date with the most current @mermaid-js/mermaid-cli package. @mermaid-js/mermaid-cli has a peer dependency to puppeteer (currently version 23), which you also have to install to your project. To make a complete install in one go, issue the command:
 
-`npm install @mermaid-js/mermaid-cli markdown-it-mermaid-server`
+`npm install puppeteer@23 @mermaid-js/mermaid-cli markdown-it-mermaid-server`
 
 ## Use
 
@@ -43,6 +43,7 @@ const markdownItMermaidOptions = {
   themeCSS: "",
   mermaidConfig: {},
   puppeteerConfig: {},
+  throwOnError: false,
   verbose: false
 };
 
@@ -59,4 +60,5 @@ Use the `workingFolder` exclusively for markdown-it-mermaid-server and not for o
 - `themeCSS`: A custom Mermaid Theme-CSS to style the resulting SVG diagrams. By default empty.
 - `mermaidConfig`: The Mermaid [configuration JSON](https://mermaid.js.org/config/schema-docs/config.html) object. By default empty.
 - `puppeteerConfig`: The Puppeteer [configuration JSON](https://pptr.dev/guides/configuration) object. By default empty.
+- `throwOnError`: A value of `true` will throw errors that occurred during processing. A value of `false` will only log errors. Default value is `false`.
 - `verbose`: A value of `true` will activate detailed logging. Default is `false`.
