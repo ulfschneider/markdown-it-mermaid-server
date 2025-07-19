@@ -22,7 +22,7 @@ and get the chart, wrapped into a `figure` tag:
 
 ## Accessibility
 
-To improve the accessibility of the resulting charts, the plugin allows to add a `figcaption` and `alt` text to every diagram definition, introduced by the keywords `figcaption` ald `alt`. As an example:
+To improve the accessibility of the resulting charts, the plugin allows to add a `figcaption` and `alt` text to every diagram definition, introduced by the keywords `figcaption` ald `alt`. For example:
 
 ~~~markdown
 ```mermaid
@@ -34,7 +34,7 @@ B --> C["Option A"] & D["Option B"]
 ```
 ~~~
 
-As a result, you get:
+As result, you get:
 
 ```html
 <figure class="mermaid"><svg aria-label="This is the alt text of the image" aria-roledescription="flowchart-v2" role="graphics-document document" viewBox="0 0 410.96875 174" ...></svg><figcaption>This is the figcaption of the image</figcaption></figure>
