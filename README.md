@@ -22,7 +22,7 @@ and get the chart, wrapped into a `figure` tag:
 
 ## Accessibility
 
-To improve the accessibility of the resulting charts, the plugin allows to add a `figcaption` and `alt` text to every diagram definition, introduced by the keywords `figcaption` ald `alt`. For example:
+To improve the accessibility of the resulting charts, the plugin allows to add a `figcaption` and `alt` text to every diagram definition, introduced by the keywords `figcaption` and `alt`. For example:
 
 ~~~markdown
 ```mermaid
