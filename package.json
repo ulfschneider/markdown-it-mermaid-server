@@ -1,6 +1,6 @@
 {
   "name": "markdown-it-mermaid-server",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "description": "A markdown-it plugin to render mermaid charts on the server",
   "main": "index.mjs",
   "scripts": {

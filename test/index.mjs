@@ -4,6 +4,8 @@ const md = markdownit();
 
 const TEST = `\`\`\`mermaid
   flowchart LR
+    figcaption this is a figcaption
+    alt this is alt text
     A(["Start"]) --> B{"Decision"}
     B --> C["Option A"] & D["Option B"]
 \`\`\``;

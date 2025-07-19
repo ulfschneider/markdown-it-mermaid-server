@@ -55,22 +55,45 @@ function initialize(options) {
   );
   fs.writeFileSync(
     makeWorkingFilePath("theme.css"),
-    settings.themeCSS ? settings.themeCSS.replaceAll("\n", "") : "", //no newlines because of markdown processing
+    settings.themeCSS ? settings.themeCSS.replace(/[\r\n]/g, "") : "", //no newlines because of markdown processing
   );
 }
 
-function extractChartTitle(chartDefinition) {
-  const title = /\n[ ]*title[ ]+(?<title>.*)\n/i;
-  const result = chartDefinition.match(title);
-  if (result) {
-    const title = result.groups.title.trim();
-    //remove surrounding quotes
-    if (title.charAt(0) == '"' && title.charAt(title.length - 1) == '"') {
-      return title.substr(1, title.length - 2);
-    } else {
-      return title;
-    }
+function removeDoubleQuotes(value) {
+  if (value.charAt(0) == '"' && value.charAt(value - 1) == '"') {
+    return value.substring(1, value.length - 2).replaceAll('"', "&quot;");
+  } else {
+    return value.replaceAll('"', "&quot;");
   }
+}
+
+function extractMetaInformation(chartDefinition) {
+  const titleQuery = /^[ \t]*title[ \t]+(?<title>.*)$/im;
+  const figcaptionQuery = /^[ \t]*figcaption[ \t]+(?<figcaption>.*)$/im;
+  const altQuery = /^[ \t]*alt[ \t]+(?<alt>.*)$/im;
+  const titleResult = chartDefinition.match(titleQuery);
+  const figcaptionResult = chartDefinition.match(figcaptionQuery);
+  chartDefinition = chartDefinition.replace(figcaptionQuery, "");
+  const altResult = chartDefinition.match(altQuery);
+  chartDefinition = chartDefinition.replace(altQuery, "");
+
+  const result = {
+    chartDefinition: chartDefinition,
+  };
+
+  if (titleResult) {
+    result.title = removeDoubleQuotes(titleResult.groups.title.trim());
+  }
+  if (figcaptionResult) {
+    result.figcaption = removeDoubleQuotes(
+      figcaptionResult.groups.figcaption.trim(),
+    );
+  }
+  if (altResult) {
+    result.alt = removeDoubleQuotes(altResult.groups.alt.trim());
+  }
+
+  return result;
 }
 
 function prepareChartFile(chartDefinition) {
@@ -87,13 +110,23 @@ function prepareChartFile(chartDefinition) {
 
 function mermaidChart(chartDefinition) {
   try {
-    prepareChartFile(chartDefinition);
-    const chartTitle = extractChartTitle(chartDefinition);
-    const chart = fs
+    const chartMeta = extractMetaInformation(chartDefinition);
+    prepareChartFile(chartMeta.chartDefinition);
+
+    console.log(chartMeta);
+
+    let chart = fs
       .readFileSync(makeWorkingFilePath("chart.svg"), "binary")
       .toString();
 
-    return `<figure class="mermaid">${chart}${chartTitle ? `<figcaption>${chartTitle}</figcaption>` : ""}</figure>`;
+    if (chart && chartMeta.alt) {
+      chart =
+        chart.substring(0, 4) +
+        ` arial-label="${chartMeta.alt}"` +
+        chart.substring(4);
+    }
+
+    return `<figure class="mermaid">${chart}${chartMeta.figcaption ? `<figcaption>${chartMeta.figcaption}</figcaption>` : ""}</figure>`;
   } catch (err) {
     if (settings.throwOnError) {
       console.error(

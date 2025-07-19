@@ -20,6 +20,27 @@ and get the chart, wrapped into a `figure` tag:
 <figure class="mermaid"><svg aria-roledescription="flowchart-v2" role="graphics-document document" viewBox="0 0 410.96875 174" ...></svg></figure>
 ```
 
+## Accessibility
+
+To improve the accessibility of the resulting charts, the plugin allows to add a `figcaption` and `alt` text to every diagram definition, introduced by the keywords `figcaption` ald `alt`. As an example:
+
+~~~markdown
+```mermaid
+flowchart LR
+figcaption This is the figcaption of the image
+alt This is the alt text of the image
+A(["Start"]) --> B{"Decision"}
+B --> C["Option A"] & D["Option B"]
+```
+~~~
+
+As a result, you get:
+
+```html
+<figure class="mermaid"><svg aria-label="This is the alt text of the image" aria-roledescription="flowchart-v2" role="graphics-document document" viewBox="0 0 410.96875 174" ...></svg><figcaption>This is the figcaption of the image</figcaption></figure>
+```
+
+The two properties are identified, interpreted and then removed by the plugin before handing over the chart definition to mermaid for chart generation, otherwise the chart rendering process would throw a syntax error. It does not matter in what line of the chart definition the properties are located. It´s only important that they have to stay in a single line each, and that the beginning of the line starts with either the keyword `figcaption` or `alt`.
 
 ## Install
 
