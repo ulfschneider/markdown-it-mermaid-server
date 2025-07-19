@@ -23,9 +23,9 @@ and get the chart, wrapped into a `figure` tag:
 
 ## Install
 
-markdown-it-mermaid-server has a peer dependency to the [@mermaid-js/mermaid-cli](https://www.npmjs.com/package/@mermaid-js/mermaid-cli/) package. You have to add the peer dependency by yourself to your project, which allows you to update it at any time to stay up to date with the most current @mermaid-js/mermaid-cli package. To make a complete install in one go, issue the command:
+`npm install markdown-it-mermaid-server`
 
-`npm install @mermaid-js/mermaid-cli markdown-it-mermaid-server`
+markdown-it-mermaid-server has a peer dependency to the [@mermaid-js/mermaid-cli](https://www.npmjs.com/package/@mermaid-js/mermaid-cli/) package, which allows you to update it at any time to stay up to date with the most current @mermaid-js/mermaid-cli package.
 
 ## Use
 
