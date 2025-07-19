@@ -27,8 +27,8 @@ To improve the accessibility of the resulting charts, the plugin allows to add a
 ~~~markdown
 ```mermaid
 flowchart LR
-figcaption This is the figcaption of the image
-alt This is the alt text of the image
+figcaption This is the figcaption of the flow chart
+alt This is the alt text of the flow chart
 A(["Start"]) --> B{"Decision"}
 B --> C["Option A"] & D["Option B"]
 ```
@@ -37,7 +37,7 @@ B --> C["Option A"] & D["Option B"]
 As result, you get:
 
 ```html
-<figure class="mermaid"><svg aria-label="This is the alt text of the image" aria-roledescription="flowchart-v2" role="graphics-document document" viewBox="0 0 410.96875 174" ...></svg><figcaption>This is the figcaption of the image</figcaption></figure>
+<figure class="mermaid"><svg aria-label="This is the alt text of the flow chart" aria-roledescription="flowchart-v2" role="graphics-document document" viewBox="0 0 410.96875 174" ...></svg><figcaption>This is the figcaption of the flow chart</figcaption></figure>
 ```
 
 The two properties are identified, interpreted and then removed by the plugin before handing over the chart definition to mermaid for chart generation, otherwise the chart rendering process would throw a syntax error. It does not matter in what line of the chart definition the properties are located. It´s only important that they have to stay in a single line each, and that the beginning of the line starts with either the keyword `figcaption` or `alt`.
