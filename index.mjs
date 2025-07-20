@@ -55,7 +55,9 @@ function initialize(options) {
   );
   fs.writeFileSync(
     makeWorkingFilePath("theme.css"),
-    settings.themeCSS ? settings.themeCSS.replace(/[\r\n]/g, "") : "", //no newlines because of markdown processing
+    settings.themeCSS
+      ? settings.themeCSS.replace(/[\r\n]/g, "") //no newlines because of markdown processing
+      : settings.themeCSS,
   );
 }
 
@@ -67,33 +69,44 @@ function removeDoubleQuotes(value) {
   }
 }
 
-function extractMetaInformation(chartDefinition) {
-  const titleQuery = /^[ \t]*title[ \t]+(?<title>.*)$/im;
+function prepareChartData(chartDefinition) {
+  // extract additional information that is not part of the mermaid syntax
+  // and needs to be removed
+
   const figcaptionQuery = /^[ \t]*figcaption[ \t]+(?<figcaption>.*)$/im;
   const altQuery = /^[ \t]*alt[ \t]+(?<alt>.*)$/im;
-  const titleResult = chartDefinition.match(titleQuery);
   const figcaptionResult = chartDefinition.match(figcaptionQuery);
   chartDefinition = chartDefinition.replace(figcaptionQuery, "");
   const altResult = chartDefinition.match(altQuery);
   chartDefinition = chartDefinition.replace(altQuery, "");
 
-  const result = {
+  const chartData = {
     chartDefinition: chartDefinition,
   };
 
-  if (titleResult) {
-    result.title = removeDoubleQuotes(titleResult.groups.title.trim());
-  }
   if (figcaptionResult) {
-    result.figcaption = removeDoubleQuotes(
+    chartData.figcaption = removeDoubleQuotes(
       figcaptionResult.groups.figcaption.trim(),
     );
   }
   if (altResult) {
-    result.alt = removeDoubleQuotes(altResult.groups.alt.trim());
+    chartData.alt = removeDoubleQuotes(altResult.groups.alt.trim());
   }
 
-  return result;
+  // make the chart from the mermaid syntax
+
+  chartData.chart = prepareChartFile(chartData.chartDefinition);
+
+  // puth the aria-label into the chart
+
+  if (chartData.chart && chartData.alt) {
+    chartData.chart =
+      chartData.chart.substring(0, 4) +
+      ` arial-label="${chartData.alt}"` +
+      chartData.chart.substring(4);
+  }
+
+  return chartData;
 }
 
 function prepareChartFile(chartDefinition) {
@@ -106,25 +119,15 @@ function prepareChartFile(chartDefinition) {
       stdio: "inherit",
     },
   );
+  const buffer = fs.readFileSync(makeWorkingFilePath("chart.svg"));
+  return buffer.toString();
 }
 
-function mermaidChart(chartDefinition) {
+function renderChart(chartDefinition) {
   try {
-    const chartMeta = extractMetaInformation(chartDefinition);
-    prepareChartFile(chartMeta.chartDefinition);
+    const chartData = prepareChartData(chartDefinition);
 
-    let chart = fs
-      .readFileSync(makeWorkingFilePath("chart.svg"), "binary")
-      .toString();
-
-    if (chart && chartMeta.alt) {
-      chart =
-        chart.substring(0, 4) +
-        ` arial-label="${chartMeta.alt}"` +
-        chart.substring(4);
-    }
-
-    return `<figure class="mermaid">${chart}${chartMeta.figcaption ? `<figcaption>${chartMeta.figcaption}</figcaption>` : ""}</figure>`;
+    return `<figure class="mermaid">${chartData.chart}${chartData.figcaption ? `<figcaption>${chartData.figcaption}</figcaption>` : ""}</figure>`;
   } catch (err) {
     if (settings.throwOnError) {
       console.error(
@@ -148,7 +151,7 @@ export default function MermaidServerPlugin(md, options) {
     const token = tokens[idx];
     const code = token.content.trim();
     if (token.info.toLowerCase() == "mermaid") {
-      return mermaidChart(code);
+      return renderChart(code);
     }
     return temp(tokens, idx, options, env, slf);
   };
