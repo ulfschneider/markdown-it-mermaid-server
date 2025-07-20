@@ -33,6 +33,10 @@ function makeFolderPath(folderPath) {
   return path.normalize(folderPath);
 }
 
+/**
+ * Initialize the plugin and create non-existing folders
+ * @param {Object} options The settings given to the plugin
+ */
 function initialize(options) {
   settings = Object.assign(settings, options);
   settings.workingFolder = makeFolderPath(settings.workingFolder);
@@ -61,6 +65,12 @@ function initialize(options) {
   );
 }
 
+/**
+ * Takes a string, removes surrounding double quotes
+ * and escapes remaining double quotes with <code>&quot;</code>
+ * @param {String} value The string to string the double quotes from
+ * @returns {String} The stripped string
+ */
 function removeDoubleQuotes(value) {
   if (value.charAt(0) == '"' && value.charAt(value - 1) == '"') {
     return value.substring(1, value.length - 2).replaceAll('"', "&quot;");
@@ -69,6 +79,18 @@ function removeDoubleQuotes(value) {
   }
 }
 
+/**
+ * Takes a mermaid chart definition, extract meta information that is not
+ * part of the mermaid syntax (figcaption and alt) and remove those properties
+ * from the chart definition. Then transforms the chart definition into a SVG chart.
+ * @param {String} chartDefinition the mermaid chart definition
+ * @returns {Object} The extracted and prepared chart chartData
+ * @property {String} chartDefinition The chart definition without figcaption and alt
+ * @property {String} chart The SVG chart, including an aria-label with the alt text
+ * @property {String|undefined} figcaption The extracted figcaption or undefined
+ * @property {String|undefined} alt The extracted alt text or undefined
+ *
+ */
 function prepareChartData(chartDefinition) {
   // extract additional information that is not part of the mermaid syntax
   // and needs to be removed
@@ -109,6 +131,13 @@ function prepareChartData(chartDefinition) {
   return chartData;
 }
 
+/**
+ * The key element of the plugin. Takes a mermaid chart definition
+ * and uses a sync execution of mermaid-cli as a node child process
+ * to transform the chart definition into a SVG chart
+ * @param {String} chartDefinition The mermaid chart definition
+ * @returns The rendered SVG chart as a string
+ */
 function prepareChartFile(chartDefinition) {
   fs.writeFileSync(makeWorkingFilePath("chart.mmd"), chartDefinition);
   execSync(
@@ -123,6 +152,14 @@ function prepareChartFile(chartDefinition) {
   return buffer.toString();
 }
 
+/**
+ * Will take a mermaid chart definition and transform it
+ * into a HTML figure tag
+ * @param {String} chartDefinition The mermaid chart definition
+ * @return
+ * {String} A HTML figure tag with the SVG chart embedded,
+ * or a HTML pre tag with the chart definition in case of a failure
+ */
 function renderChart(chartDefinition) {
   try {
     const chartData = prepareChartData(chartDefinition);
@@ -145,19 +182,18 @@ function renderChart(chartDefinition) {
 }
 
 /**
- * @description
  * A plugin to transform mermaid chart definitions
  * into SVG charts during the markdown-it transformation on the server.
  *
  * @param {Object} md The markdown instance
  * @param {Object} options The settings of the plugin, optional
- * @param {String} workkingFolder The temporary working folder of the plugin, default is 'mermaidTmp'
- * @param {String} backgroundColor The background color for the rendered charts, default is 'white'
- * @param {String} themeCSS The theme css to style the resulting SVG charts
- * @param {Object} mermaidConfig The memaid configuration object
- * @param {Object} puppeteerConfig The puppeteer configuration object
- * @param {Boolean} throwError When true, errors are thrown to stop the transformation. Default is false.
- * @param {Boolean} verbose When true, logging is  detailed. Default is false.
+ * @param {String} options.workingFolder The temporary working folder of the plugin, default is 'mermaidTmp'
+ * @param {String} options.backgroundColor The background color for the rendered charts, default is 'white'
+ * @param {String} options.themeCSS The theme css to style the resulting SVG charts
+ * @param {Object} options.mermaidConfig The memaid configuration object
+ * @param {Object} options.puppeteerConfig The puppeteer configuration object
+ * @param {Boolean} options.throwError When true, errors are thrown to stop the transformation. Default is false.
+ * @param {Boolean} options.verbose When true, logging is  detailed. Default is false.
  */
 export default function MermaidServerPlugin(md, options) {
   initialize(options);
