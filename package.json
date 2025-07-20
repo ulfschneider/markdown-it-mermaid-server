@@ -1,6 +1,6 @@
 {
   "name": "markdown-it-mermaid-server",
-  "version": "0.6.5",
+  "version": "0.6.4",
   "description": "A markdown-it plugin to render mermaid charts into SVG on the server",
   "main": "index.mjs",
   "scripts": {
