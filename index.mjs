@@ -144,6 +144,21 @@ function renderChart(chartDefinition) {
   }
 }
 
+/**
+ * @description
+ * A plugin to transform mermaid chart definitions
+ * into SVG charts during the markdown-it transformation on the server.
+ *
+ * @param {Object} md The markdown instance
+ * @param {Object} options The settings of the plugin, optional
+ * @param {String} workkingFolder The temporary working folder of the plugin, default is 'mermaidTmp'
+ * @param {String} backgroundColor The background color for the rendered charts, default is 'white'
+ * @param {String} themeCSS The theme css to style the resulting SVG charts
+ * @param {Object} mermaidConfig The memaid configuration object
+ * @param {Object} puppeteerConfig The puppeteer configuration object
+ * @param {Boolean} throwError When true, errors are thrown to stop the transformation. Default is false.
+ * @param {Boolean} verbose When true, logging is  detailed. Default is false.
+ */
 export default function MermaidServerPlugin(md, options) {
   initialize(options);
   const temp = md.renderer.rules.fence.bind(md.renderer.rules);
