@@ -5,7 +5,7 @@ import { customAlphabet } from "nanoid";
 import chalk from "chalk";
 import pkg from "./package.json" with { type: "json" };
 
-const nanoid = customAlphabet("1234567890abcdefghijklmnopqrstuvwxyz", 12);
+const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz", 12);
 
 let settings = {
   workingFolder: "mermaidTmp",
