@@ -1,8 +1,11 @@
 import * as fs from "node:fs";
 import path from "node:path";
 import { execSync } from "node:child_process";
+import { customAlphabet } from "nanoid";
 import chalk from "chalk";
 import pkg from "./package.json" with { type: "json" };
+
+const nanoid = customAlphabet("1234567890abcdefghijklmnopqrstuvwxyz", 12);
 
 let settings = {
   workingFolder: "mermaidTmp",
@@ -79,6 +82,10 @@ function removeDoubleQuotes(value) {
   }
 }
 
+function removeEmptyLines(value) {
+  return value.replace(/\r/g, "").replace(/\n[\s]*\n/g, "\n");
+}
+
 /**
  * Takes a mermaid chart definition, extract meta information that is not
  * part of the mermaid syntax (figcaption and alt) and remove those properties
@@ -141,7 +148,7 @@ function prepareChartData(chartDefinition) {
 function prepareChartFile(chartDefinition) {
   fs.writeFileSync(makeWorkingFilePath("chart.mmd"), chartDefinition);
   execSync(
-    `npx -p @mermaid-js/mermaid-cli mmdc -q --backgroundColor ${settings.backgroundColor} --cssFile ${makeWorkingFilePath("theme.css")} --input ${makeWorkingFilePath("chart.mmd")} --output ${makeWorkingFilePath("chart.svg")} --configFile ${makeWorkingFilePath("mermaidConfig.json")} --puppeteerConfigFile ${makeWorkingFilePath("puppeteerConfig.json")}`,
+    `npx -p @mermaid-js/mermaid-cli mmdc -q --svgId ${nanoid()} --backgroundColor ${settings.backgroundColor} --cssFile ${makeWorkingFilePath("theme.css")} --input ${makeWorkingFilePath("chart.mmd")} --output ${makeWorkingFilePath("chart.svg")} --configFile ${makeWorkingFilePath("mermaidConfig.json")} --puppeteerConfigFile ${makeWorkingFilePath("puppeteerConfig.json")}`,
     {
       cwd: "./",
       encoding: "utf-8",
@@ -164,7 +171,9 @@ function renderChart(chartDefinition) {
   try {
     const chartData = prepareChartData(chartDefinition);
 
-    return `<figure class="mermaid">${chartData.chart}${chartData.figcaption ? `<figcaption>${chartData.figcaption}</figcaption>` : ""}</figure>`;
+    return removeEmptyLines(
+      `<figure class="mermaid">${chartData.chart}${chartData.figcaption ? `<figcaption>${chartData.figcaption}</figcaption>` : ""}</figure>`,
+    );
   } catch (err) {
     if (settings.throwOnError) {
       console.error(
@@ -176,7 +185,7 @@ function renderChart(chartDefinition) {
         chalk.red(`Failure rendering mermaid chart ${chartDefinition}`),
         err,
       );
-      return `<pre>${chartDefinition}</pre>`;
+      return removeEmptyLines(`<pre>${chartDefinition}</pre>`);
     }
   }
 }

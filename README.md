@@ -17,7 +17,7 @@ B --> C["Option A"] & D["Option B"]
 and get the chart, wrapped into a `figure` tag:
 
 ```html
-<figure class="mermaid"><svg aria-roledescription="flowchart-v2" role="graphics-document document" viewBox="0 0 410.96875 174" ...></svg></figure>
+<figure class="mermaid"><svg aria-roledescription="flowchart-v2" role="graphics-document document" viewBox="0 0 410.96875 174" id="zfsxik3oxjrp"...></svg></figure>
 ```
 
 ## Accessibility
@@ -37,7 +37,7 @@ B --> C["Option A"] & D["Option B"]
 As result, you get:
 
 ```html
-<figure class="mermaid"><svg aria-label="This is the alt text of the flow chart" aria-roledescription="flowchart-v2" role="graphics-document document" viewBox="0 0 410.96875 174" ...></svg><figcaption>This is the figcaption of the flow chart</figcaption></figure>
+<figure class="mermaid"><svg aria-label="This is the alt text of the flow chart" aria-roledescription="flowchart-v2" role="graphics-document document" viewBox="0 0 410.96875 174" id="zfsxik3oxjrp"...></svg><figcaption>This is the figcaption of the flow chart</figcaption></figure>
 ```
 
 The two properties are identified, interpreted and then removed by the plugin before handing over the chart definition to mermaid for chart generation, otherwise the chart rendering process would throw a syntax error. It does not matter in what line of the chart definition the properties are located. It´s only important that they have to stay in a single line each, and that the beginning of the line starts with either the keyword `figcaption` or `alt`.
