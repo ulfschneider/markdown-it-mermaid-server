@@ -148,7 +148,7 @@ function prepareChartData(chartDefinition) {
 function prepareChartFile(chartDefinition) {
   fs.writeFileSync(makeWorkingFilePath("chart.mmd"), chartDefinition);
   execSync(
-    `npx -p @mermaid-js/mermaid-cli mmdc -q --svgId ${nanoid()} --backgroundColor ${settings.backgroundColor} --cssFile ${makeWorkingFilePath("theme.css")} --input ${makeWorkingFilePath("chart.mmd")} --output ${makeWorkingFilePath("chart.svg")} --configFile ${makeWorkingFilePath("mermaidConfig.json")} --puppeteerConfigFile ${makeWorkingFilePath("puppeteerConfig.json")}`,
+    `npx -p @mermaid-js/mermaid-cli mmdc -q --svgId ${"mermaid" + "-" + nanoid()} --backgroundColor ${settings.backgroundColor} --cssFile ${makeWorkingFilePath("theme.css")} --input ${makeWorkingFilePath("chart.mmd")} --output ${makeWorkingFilePath("chart.svg")} --configFile ${makeWorkingFilePath("mermaidConfig.json")} --puppeteerConfigFile ${makeWorkingFilePath("puppeteerConfig.json")}`,
     {
       cwd: "./",
       encoding: "utf-8",
