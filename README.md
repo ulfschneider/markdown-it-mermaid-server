@@ -65,7 +65,8 @@ const markdownItMermaidOptions = {
   mermaidConfig: {},
   puppeteerConfig: {},
   throwOnError: false,
-  verbose: false
+  verbose: false,
+  useCache: false,
 };
 
 md.use(markdownItMermaidServer, markdownItMermaidOptions)
@@ -83,3 +84,4 @@ Use the `workingFolder` exclusively for markdown-it-mermaid-server and not for o
 - `puppeteerConfig`: The Puppeteer [configuration JSON](https://pptr.dev/guides/configuration) object. By default empty.
 - `throwOnError`: A value of `true` will throw errors that occurred during processing. A value of `false` will only log errors. Default value is `false`.
 - `verbose`: A value of `true` will activate detailed logging. Default is `false`.
+- `useCache`: A value of `true` will activate the internal cache, which will render every chart only once with mermaid-cli and if the same chart (definied by its chart definition) is requested again, will use a cache to to render the inline svg. In local development scenarios this can save a lot of time for repeated builds. Default is `true`.

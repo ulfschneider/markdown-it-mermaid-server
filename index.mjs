@@ -6,6 +6,9 @@ import chalk from "chalk";
 import pkg from "./package.json" with { type: "json" };
 
 const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz", 12);
+const cache = new Map();
+let cacheLogged = false;
+let renderingLogged = false;
 
 let settings = {
   workingFolder: "mermaidTmp",
@@ -16,7 +19,16 @@ let settings = {
   puppeteerConfig: {},
   throwOnError: false,
   verbose: false,
+  useCache: true,
 };
+
+function getCachedSvg(chartDefinition) {
+  return cache.get(chartDefinition);
+}
+
+function updateCachedSvg(chartDefinition, svg) {
+  cache.set(chartDefinition, svg);
+}
 
 function printSettings() {
   if (settings.verbose) {
@@ -146,6 +158,23 @@ function prepareChartData(chartDefinition) {
  * @returns The rendered SVG chart as a string
  */
 function prepareChartFile(chartDefinition) {
+  let svg;
+  if (!renderingLogged) {
+    console.log(chalk.cyan("Rendering mermaid SVG images"));
+    renderingLogged = true;
+  }
+
+  if (settings.useCache) {
+    svg = getCachedSvg(chartDefinition);
+    if (svg) {
+      if (!cacheLogged) {
+        console.log(chalk.cyan("Re-using cached mermaid SVG images"));
+        cacheLogged = true;
+      }
+      return svg;
+    }
+  }
+
   fs.writeFileSync(makeWorkingFilePath("chart.mmd"), chartDefinition);
   execSync(
     `npx -p @mermaid-js/mermaid-cli mmdc -q --svgId ${"mermaid" + "-" + nanoid()} --backgroundColor ${settings.backgroundColor} --cssFile ${makeWorkingFilePath("theme.css")} --input ${makeWorkingFilePath("chart.mmd")} --output ${makeWorkingFilePath("chart.svg")} --configFile ${makeWorkingFilePath("mermaidConfig.json")} --puppeteerConfigFile ${makeWorkingFilePath("puppeteerConfig.json")}`,
@@ -156,7 +185,11 @@ function prepareChartFile(chartDefinition) {
     },
   );
   const buffer = fs.readFileSync(makeWorkingFilePath("chart.svg"));
-  return buffer.toString();
+  svg = buffer.toString();
+  if (settings.useCache) {
+    updateCachedSvg(chartDefinition, svg);
+  }
+  return svg;
 }
 
 /**
