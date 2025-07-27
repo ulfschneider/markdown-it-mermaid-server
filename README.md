@@ -66,7 +66,7 @@ const markdownItMermaidOptions = {
   puppeteerConfig: {},
   throwOnError: false,
   verbose: false,
-  useCache: false,
+  useCache: true,
 };
 
 md.use(markdownItMermaidServer, markdownItMermaidOptions)
