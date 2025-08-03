@@ -1,8 +1,9 @@
 {
   "name": "markdown-it-mermaid-server",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "A markdown-it plugin to render mermaid charts into SVG on the server",
   "main": "index.mjs",
+  "type": "module",
   "scripts": {
     "test": "node ./test/index.mjs"
   },
@@ -21,10 +22,12 @@
   "license": "MIT",
   "dependencies": {
     "chalk": "^5.4.1",
+    "del": "^8.0.0",
+    "mermaid-cli-batch": "^0.2.1",
     "nanoid": "^5.1.5"
   },
   "peerDependencies": {
-    "@mermaid-js/mermaid-cli": "^11.6.0"
+    "playwright": "^1.54.2"
   },
   "devDependencies": {
     "markdown-it": "^14.1.0"

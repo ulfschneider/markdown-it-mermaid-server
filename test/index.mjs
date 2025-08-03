@@ -8,9 +8,36 @@ const TEST = `\`\`\`mermaid
     alt this is alt text
     A(["Start"]) --> B{"Decision"}
     B --> C["Option A"] & D["Option B"]
+\`\`\`
+
+
+\`\`\`mermaid
+  flowchart LR
+    figcaption this is a figcaption
+    alt this is alt text
+    A(["Start"]) --> B{"Decision"}
+    B --> C["Option A"] & D["Option B"]
+\`\`\`
+
+
+\`\`\`mermaid
+  flowchart LR
+    figcaption this is a figcaption
+    alt this is alt text
+    A(["Start"]) --> B{"Decision"}
+    B --> C["Option A"] & D["Option B"]
+\`\`\`
+
+
+\`\`\`mermaid
+  flowchart LR
+    figcaption this is a figcaption
+    alt this is alt text
+    A(["Start"]) --> B{"Decision"}
+    B --> C["Option A"] & D["Option B"]
 \`\`\``;
 
-md.use(markdownItMermaid);
+md.use(markdownItMermaid, { clearWorkingFolder: false, verbose: true });
 
 const result = md.render(TEST);
 console.log(result);

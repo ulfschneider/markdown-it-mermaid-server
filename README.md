@@ -44,9 +44,14 @@ The two properties are identified, interpreted and then removed by the plugin be
 
 ## Install
 
-`npm install markdown-it-mermaid-server`
+mermaid-cli-batch has a peer dependency to playwright that you have to install by yourself prior of using the package:
 
-markdown-it-mermaid-server has a peer dependency to the [@mermaid-js/mermaid-cli](https://www.npmjs.com/package/@mermaid-js/mermaid-cli/) package, which allows you to update it at any time to stay up to date with the most current @mermaid-js/mermaid-cli package.
+`npm i playwright`
+`npx playwright install --with-deps chromium`
+
+Then install the package itself:
+
+`npm install markdown-it-mermaid-server`
 
 ## Use
 
@@ -59,11 +64,7 @@ const md = markdownIt()
 //default settings
 const markdownItMermaidOptions = {
   workingFolder: "mermaidTmp",
-  clearWorkingFolder: true,
-  backgroundColor: "white",
-  themeCSS: "",
-  mermaidConfig: {},
-  puppeteerConfig: {},
+  clearWorkingFolder: false,
   throwOnError: false,
   verbose: false,
   useCache: true,
@@ -78,10 +79,6 @@ Use the `workingFolder` exclusively for markdown-it-mermaid-server and not for o
 
 - `workingFolder`: A temporary folder to used to transform the Mermaid diagram definitions into SVG images. The default name of the folder is `mermaidTmp`. **Add the folder to your `.gitignore` file, because it doesn´t require code versioning**.
 - `clearWorkingFolder`: A value of `true` will delete the working folder when initializing the plugin. Default is `false`.
-- `backgroundColor`: The background for the SVG diagrams. Default is `white`.
-- `themeCSS`: A custom Mermaid Theme-CSS to style the resulting SVG diagrams. By default empty.
-- `mermaidConfig`: The Mermaid [configuration JSON](https://mermaid.js.org/config/schema-docs/config.html) object. By default empty.
-- `puppeteerConfig`: The Puppeteer [configuration JSON](https://pptr.dev/guides/configuration) object. By default empty.
 - `throwOnError`: A value of `true` will throw errors that occurred during processing. A value of `false` will only log errors. Default value is `false`.
 - `verbose`: A value of `true` will activate detailed logging. Default is `false`.
 - `useCache`: A value of `true` will activate the internal cache, which will render every chart only once with mermaid-cli and if the same chart (definied by its chart definition) is requested again, will use a cache to to render the inline svg. In local development scenarios this can save a lot of time for repeated builds. Default is `true`.

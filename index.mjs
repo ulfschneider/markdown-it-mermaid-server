@@ -1,43 +1,37 @@
 import * as fs from "node:fs";
 import path from "node:path";
 import { execSync } from "node:child_process";
+import { deleteSync } from "del";
 import { customAlphabet } from "nanoid";
 import chalk from "chalk";
 import pkg from "./package.json" with { type: "json" };
 
 const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz", 12);
-const cache = new Map();
-let cacheLogged = false;
-let renderingLogged = false;
+const chartDefinitions = new Map();
+let transformLogged = false;
 
 let settings = {
   workingFolder: "mermaidTmp",
   clearWorkingFolder: false,
-  backgroundColor: "white",
-  themeCSS: "",
-  mermaidConfig: {},
-  puppeteerConfig: {},
   throwOnError: false,
-  verbose: false,
   useCache: true,
+  verbose: false,
 };
-
-function getCachedSvg(chartDefinition) {
-  return cache.get(chartDefinition);
-}
-
-function updateCachedSvg(chartDefinition, svg) {
-  cache.set(chartDefinition, svg);
-}
 
 function printSettings() {
   if (settings.verbose) {
-    console.log(
-      chalk.cyan(
-        `${pkg.name} settings ` + JSON.stringify(settings, null, "  "),
-      ),
-    );
+    writeLog(JSON.stringify(settings, null, "  "));
   }
+}
+
+function writeLog(message) {
+  if (settings.verbose) {
+    console.log(chalk.white.bold(`[${pkg.name}]`), message);
+  }
+}
+
+function enforceLog(message) {
+  console.log(chalk.white.bold(`[${pkg.name}]`), message);
 }
 
 function makeWorkingFilePath(fileName) {
@@ -64,20 +58,6 @@ function initialize(options) {
   if (!fs.existsSync(settings.workingFolder)) {
     fs.mkdirSync(settings.workingFolder);
   }
-  fs.writeFileSync(
-    makeWorkingFilePath("mermaidConfig.json"),
-    JSON.stringify(settings.mermaidConfig),
-  );
-  fs.writeFileSync(
-    makeWorkingFilePath("puppeteerConfig.json"),
-    JSON.stringify(settings.puppeteerConfig),
-  );
-  fs.writeFileSync(
-    makeWorkingFilePath("theme.css"),
-    settings.themeCSS
-      ? settings.themeCSS.replace(/[\r\n]/g, "") //no newlines because of markdown processing
-      : settings.themeCSS,
-  );
 }
 
 /**
@@ -110,20 +90,24 @@ function removeEmptyLines(value) {
  * @property {String|undefined} alt The extracted alt text or undefined
  *
  */
-function prepareChartData(chartDefinition) {
+function parseChartDefinition(chartDefinition) {
+  if (settings.useCache && chartDefinitions.has(chartDefinition)) {
+    return;
+  }
+
+  const chartData = {
+    id: nanoid(),
+    chartDefinition: chartDefinition,
+  };
+
   // extract additional information that is not part of the mermaid syntax
   // and needs to be removed
-
   const figcaptionQuery = /^[ \t]*figcaption[ \t]+(?<figcaption>.*)$/im;
   const altQuery = /^[ \t]*alt[ \t]+(?<alt>.*)$/im;
   const figcaptionResult = chartDefinition.match(figcaptionQuery);
-  chartDefinition = chartDefinition.replace(figcaptionQuery, "");
+  chartData.chartDefinition = chartDefinition.replace(figcaptionQuery, "");
   const altResult = chartDefinition.match(altQuery);
-  chartDefinition = chartDefinition.replace(altQuery, "");
-
-  const chartData = {
-    chartDefinition: chartDefinition,
-  };
+  chartData.chartDefinition = chartData.chartDefinition.replace(altQuery, "");
 
   if (figcaptionResult) {
     chartData.figcaption = removeDoubleQuotes(
@@ -134,89 +118,101 @@ function prepareChartData(chartDefinition) {
     chartData.alt = removeDoubleQuotes(altResult.groups.alt.trim());
   }
 
-  // make the chart from the mermaid syntax
-
-  chartData.chart = prepareChartFile(chartData.chartDefinition);
-
-  // puth the aria-label into the chart
-
-  if (chartData.chart && chartData.alt) {
-    chartData.chart =
-      chartData.chart.substring(0, 4) +
-      ` arial-label="${chartData.alt}"` +
-      chartData.chart.substring(4);
-  }
+  //use the original chart definition as the key
+  chartDefinitions.set(chartDefinition, chartData);
 
   return chartData;
 }
 
-/**
- * The key element of the plugin. Takes a mermaid chart definition
- * and uses a sync execution of mermaid-cli as a node child process
- * to transform the chart definition into a SVG chart
- * @param {String} chartDefinition The mermaid chart definition
- * @returns The rendered SVG chart as a string
- */
-function prepareChartFile(chartDefinition) {
-  let svg;
-  if (!renderingLogged) {
-    console.log(chalk.cyan("Rendering mermaid SVG images"));
-    renderingLogged = true;
-  }
-
-  if (settings.useCache) {
-    svg = getCachedSvg(chartDefinition);
-    if (svg) {
-      if (!cacheLogged) {
-        console.log(chalk.cyan("Re-using cached mermaid SVG images"));
-        cacheLogged = true;
-      }
-      return svg;
-    }
-  }
-
-  fs.writeFileSync(makeWorkingFilePath("chart.mmd"), chartDefinition);
+function transform() {
   execSync(
-    `npx -p @mermaid-js/mermaid-cli mmdc -q --svgId ${"mermaid" + "-" + nanoid()} --backgroundColor ${settings.backgroundColor} --cssFile ${makeWorkingFilePath("theme.css")} --input ${makeWorkingFilePath("chart.mmd")} --output ${makeWorkingFilePath("chart.svg")} --configFile ${makeWorkingFilePath("mermaidConfig.json")} --puppeteerConfigFile ${makeWorkingFilePath("puppeteerConfig.json")}`,
+    `npx mermaid-cli-batch --input ${makeWorkingFilePath("/*.mmd")}${settings.verbose ? " --verbose" : ""}`,
     {
       cwd: "./",
       encoding: "utf-8",
       stdio: "inherit",
     },
   );
-  const buffer = fs.readFileSync(makeWorkingFilePath("chart.svg"));
-  svg = buffer.toString();
-  if (settings.useCache) {
-    updateCachedSvg(chartDefinition, svg);
+}
+
+function readTransformResults() {
+  //store the svg files in our chartDefinitions data structure
+  for (const chartData of chartDefinitions.values()) {
+    if (!chartData.svg) {
+      //read the svg
+      chartData.svg = fs
+        .readFileSync(makeWorkingFilePath(`${chartData.id}.svg`))
+        .toString();
+
+      //clean up
+      deleteSync(makeWorkingFilePath(`${chartData.id}.*`));
+
+      // put the aria-label into the chart
+      if (chartData.alt) {
+        chartData.svg =
+          chartData.svg.substring(0, 4) +
+          ` arial-label="${chartData.alt}"` +
+          chartData.svg.substring(4);
+      }
+    }
   }
-  return svg;
+}
+
+function prepareSVGs() {
+  // when the chartDefinitions are not empty,
+  // mermaid chart definitions have been found during a parse phase
+  // which must not be the the parse phase that belongs to the current render phase
+  // so the chart definitions might come from parsing a different document, but are still cached
+
+  let svgTransformRequired = false;
+  for (const chartData of chartDefinitions.values()) {
+    if (!chartData.svg) {
+      // only if we do not have an svg we have to prepare and run a transformation
+      // if we already have an svg, we will re-use it
+
+      // the written file is a mermaid diagram definition that will be
+      // transformed to svg in a subsequent step
+      fs.writeFileSync(
+        makeWorkingFilePath(`${chartData.id}.mmd`),
+        chartData.chartDefinition,
+      );
+      svgTransformRequired = true;
+    }
+  }
+
+  if (svgTransformRequired) {
+    // there was at least one entry in the chartDefinitions that did not have an svg attached
+    // the transform and the readTransformResults due to improved performance
+    // will operate on all chartDefinitions that didn´t have an svg in one go!
+    transform();
+    readTransformResults();
+  }
 }
 
 /**
  * Will take a mermaid chart definition and transform it
- * into a HTML figure tag
+ * into a HTML figure tag containing the mermaid chart as an SVG
  * @param {String} chartDefinition The mermaid chart definition
  * @return
  * {String} A HTML figure tag with the SVG chart embedded,
  * or a HTML pre tag with the chart definition in case of a failure
  */
 function renderChart(chartDefinition) {
+  prepareSVGs();
+
   try {
-    const chartData = prepareChartData(chartDefinition);
+    const chartData = chartDefinitions.get(chartDefinition);
 
     return removeEmptyLines(
-      `<figure class="mermaid">${chartData.chart}${chartData.figcaption ? `<figcaption>${chartData.figcaption}</figcaption>` : ""}</figure>`,
+      `<figure class="mermaid">${chartData.svg}${chartData.figcaption ? `<figcaption>${chartData.figcaption}</figcaption>` : ""}</figure>`,
     );
   } catch (err) {
     if (settings.throwOnError) {
-      console.error(
-        chalk.red(`Failure rendering mermaid chart ${chartDefinition}`),
-      );
+      enforceLog(chalk.red(`Failure rendering chart ${chartDefinition}`));
       throw err;
     } else {
-      console.error(
-        chalk.red(`Failure rendering mermaid chart ${chartDefinition}`),
-        err,
+      enforceLog(
+        chalk.red(`Failure rendering chart ${chartDefinition} ${err}`),
       );
       return removeEmptyLines(`<pre>${chartDefinition}</pre>`);
     }
@@ -230,22 +226,51 @@ function renderChart(chartDefinition) {
  * @param {Object} md The markdown instance
  * @param {Object} options The settings of the plugin, optional
  * @param {String} options.workingFolder The temporary working folder of the plugin, default is 'mermaidTmp'
- * @param {String} options.backgroundColor The background color for the rendered charts, default is 'white'
- * @param {String} options.themeCSS The theme css to style the resulting SVG charts
- * @param {Object} options.mermaidConfig The memaid configuration object
- * @param {Object} options.puppeteerConfig The puppeteer configuration object
  * @param {Boolean} options.throwError When true, errors are thrown to stop the transformation. Default is false.
  * @param {Boolean} options.verbose When true, logging is  detailed. Default is false.
  */
 export default function MermaidServerPlugin(md, options) {
   initialize(options);
-  const temp = md.renderer.rules.fence.bind(md.renderer.rules);
+
+  const origParseRule = md.block.ruler.__rules__.find(
+    (rule) => rule.name === "fence",
+  ).fn;
+
+  // to improve transformation performance
+  // we use the parse phase to collect all chart definitions during a single markdown transformation
+  md.block.ruler.at(
+    "fence",
+    function enhancedFence(state, startLine, endLine, silent) {
+      const result = origParseRule(state, startLine, endLine, silent);
+      // Find the last added token (it's our code block)
+      const token = state.tokens[state.tokens.length - 1];
+
+      if (token?.info?.toLowerCase() == "mermaid") {
+        parseChartDefinition(token.content);
+      }
+      return result;
+    },
+  );
+
+  // to improve transformation performance
+  // all chart definitions that have been found during the parse phase
+  // will be transformed in one go to svg charts during the render phase
+  // this will be kicked off when the first mermaid diagram has to be rendered
+  // but it will be done for all other mermaid diagrams that will later be rendered
+  // even in this first step
+  // all subsequent renderings of mermaid charts will look for the svgs that have
+  // been rendered before
+  const origRenderRule = md.renderer.rules.fence.bind(md.renderer.rules);
   md.renderer.rules.fence = (tokens, idx, options, env, slf) => {
     const token = tokens[idx];
-    const code = token.content.trim();
-    if (token.info.toLowerCase() == "mermaid") {
-      return renderChart(code);
+
+    if (token?.info?.toLowerCase() == "mermaid") {
+      if (!transformLogged) {
+        enforceLog("Transforming charts");
+        transformLogged = true;
+      }
+      return renderChart(token.content);
     }
-    return temp(tokens, idx, options, env, slf);
+    return origRenderRule(tokens, idx, options, env, slf);
   };
 }
