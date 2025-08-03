@@ -46,12 +46,16 @@ The two properties are identified, interpreted and then removed by the plugin be
 
 mermaid-cli-batch has a peer dependency to playwright that you have to install by yourself prior of using the package:
 
-`npm i playwright`
-`npx playwright install --with-deps chromium`
+```sh
+npm i playwright
+npx playwright install chromium
+```
 
 Then install the package itself:
 
-`npm install markdown-it-mermaid-server`
+```sh
+npm install markdown-it-mermaid-server
+```
 
 ## Use
 
