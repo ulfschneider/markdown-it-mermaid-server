@@ -63,7 +63,7 @@ function initialize(options) {
 /**
  * Takes a string, removes surrounding double quotes
  * and escapes remaining double quotes with <code>&quot;</code>
- * @param {String} value The string to string the double quotes from
+ * @param {String} value The string to strip the double quotes from
  * @returns {String} The stripped string
  */
 function removeDoubleQuotes(value) {
