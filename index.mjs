@@ -95,33 +95,42 @@ function parseChartDefinition(chartDefinition) {
     return;
   }
 
-  const chartData = {
-    id: nanoid(),
-    chartDefinition: chartDefinition,
-  };
+  try {
+    const chartData = {
+      id: nanoid(),
+      chartDefinition: chartDefinition,
+    };
 
-  // extract additional information that is not part of the mermaid syntax
-  // and needs to be removed
-  const figcaptionQuery = /^[ \t]*figcaption[ \t]+(?<figcaption>.*)$/im;
-  const altQuery = /^[ \t]*alt[ \t]+(?<alt>.*)$/im;
-  const figcaptionResult = chartDefinition.match(figcaptionQuery);
-  chartData.chartDefinition = chartDefinition.replace(figcaptionQuery, "");
-  const altResult = chartDefinition.match(altQuery);
-  chartData.chartDefinition = chartData.chartDefinition.replace(altQuery, "");
+    // extract additional information that is not part of the mermaid syntax
+    // and needs to be removed
+    const figcaptionQuery = /^[ \t]*figcaption[ \t]+(?<figcaption>.*)$/im;
+    const altQuery = /^[ \t]*alt[ \t]+(?<alt>.*)$/im;
+    const figcaptionResult = chartDefinition.match(figcaptionQuery);
+    chartData.chartDefinition = chartDefinition.replace(figcaptionQuery, "");
+    const altResult = chartDefinition.match(altQuery);
+    chartData.chartDefinition = chartData.chartDefinition.replace(altQuery, "");
 
-  if (figcaptionResult) {
-    chartData.figcaption = removeDoubleQuotes(
-      figcaptionResult.groups.figcaption.trim(),
-    );
+    if (figcaptionResult) {
+      chartData.figcaption = removeDoubleQuotes(
+        figcaptionResult.groups.figcaption.trim(),
+      );
+    }
+    if (altResult) {
+      chartData.alt = removeDoubleQuotes(altResult.groups.alt.trim());
+    }
+
+    //use the original chart definition as the key
+    chartDefinitions.set(chartDefinition, chartData);
+
+    return chartData;
+  } catch (err) {
+    if (settings.throwOnError) {
+      enforceLog(chalk.red(`Failure parsing ${chartDefinition}`));
+      throw err;
+    } else {
+      enforceLog(chalk.red(`Failure parsing ${chartDefinition} ${err}`));
+    }
   }
-  if (altResult) {
-    chartData.alt = removeDoubleQuotes(altResult.groups.alt.trim());
-  }
-
-  //use the original chart definition as the key
-  chartDefinitions.set(chartDefinition, chartData);
-
-  return chartData;
 }
 
 function transform() {
@@ -198,9 +207,8 @@ function prepareSVGs() {
  * or a HTML pre tag with the chart definition in case of a failure
  */
 function renderChart(chartDefinition) {
-  prepareSVGs();
-
   try {
+    prepareSVGs();
     const chartData = chartDefinitions.get(chartDefinition);
 
     return removeEmptyLines(
@@ -208,12 +216,10 @@ function renderChart(chartDefinition) {
     );
   } catch (err) {
     if (settings.throwOnError) {
-      enforceLog(chalk.red(`Failure rendering chart ${chartDefinition}`));
+      enforceLog(chalk.red(`Failure rendering ${chartDefinition}`));
       throw err;
     } else {
-      enforceLog(
-        chalk.red(`Failure rendering chart ${chartDefinition} ${err}`),
-      );
+      enforceLog(chalk.red(`Failure rendering ${chartDefinition} ${err}`));
       return removeEmptyLines(`<pre>${chartDefinition}</pre>`);
     }
   }
@@ -221,13 +227,16 @@ function renderChart(chartDefinition) {
 
 /**
  * A plugin to transform mermaid chart definitions
- * into SVG charts during the markdown-it transformation on the server.
+ * into SVG charts during the markdown-it transformation.
  *
  * @param {Object} md The markdown instance
  * @param {Object} options The settings of the plugin, optional
- * @param {String} options.workingFolder The temporary working folder of the plugin, default is 'mermaidTmp'
- * @param {Boolean} options.throwError When true, errors are thrown to stop the transformation. Default is false.
- * @param {Boolean} options.verbose When true, logging is  detailed. Default is false.
+ * @param {String} options.workingFolder The temporary working folder of the plugin, default is mermaidTmp.
+ * @param {String} options.clearWorkingFolder A value of true will delete the working folder when initializing the plugin. Default is false.
+ * @param {Boolean} options.throwOnError A value of true means errors are not catched and instead thrown.
+ *   A value of false will catch and log errors. Default value is false.
+ * @param {Boolean} options.verbose When true, logging is detailed. Default is false.
+ * @param {Boolean} options.useCache A value of true will activate the internal cache, which will render every chart only once with mermaid-cli and if the same chart (defined by its chart definition) is requested again, will use a cache to to render the inline svg. In local development scenarios this can save a lot of time for repeated builds. Default is true.
  */
 export default function MermaidServerPlugin(md, options) {
   initialize(options);

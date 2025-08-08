@@ -83,6 +83,6 @@ Use the `workingFolder` exclusively for markdown-it-mermaid-server and not for o
 
 - `workingFolder`: A temporary folder to used to transform the Mermaid diagram definitions into SVG images. The default name of the folder is `mermaidTmp`. **Add the folder to your `.gitignore` file, because it doesn´t require code versioning**.
 - `clearWorkingFolder`: A value of `true` will delete the working folder when initializing the plugin. Default is `false`.
-- `throwOnError`: A value of `true` will throw errors that occurred during processing. A value of `false` will only log errors. Default value is `false`.
+- `throwOnError`: A value of `true` means errors are not catched and instead thrown. A value of `false` will catch and log errors. Default value is `false`.
 - `verbose`: A value of `true` will activate detailed logging. Default is `false`.
-- `useCache`: A value of `true` will activate the internal cache, which will render every chart only once with mermaid-cli and if the same chart (definied by its chart definition) is requested again, will use a cache to to render the inline svg. In local development scenarios this can save a lot of time for repeated builds. Default is `true`.
+- `useCache`: A value of `true` will activate the internal cache, which will render every chart only once with mermaid-cli and if the same chart (defined by its chart definition) is requested again, will use a cache to to render the inline svg. In local development scenarios this can save a lot of time for repeated builds. Default is `true`.
