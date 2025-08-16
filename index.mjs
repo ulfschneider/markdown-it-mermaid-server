@@ -4,6 +4,7 @@ import { execSync } from "node:child_process";
 import { deleteSync } from "del";
 import { customAlphabet } from "nanoid";
 import chalk from "chalk";
+import * as cheerio from "cheerio";
 import pkg from "./package.json" with { type: "json" };
 
 const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz", 12);
@@ -156,13 +157,24 @@ function readTransformResults() {
       //clean up
       deleteSync(makeWorkingFilePath(`${chartData.id}.*`));
 
+      const $ = cheerio.load(chartData.svg);
+
       // put the aria-label into the chart
       if (chartData.alt) {
-        chartData.svg =
-          chartData.svg.substring(0, 4) +
-          ` arial-label="${chartData.alt}"` +
-          chartData.svg.substring(4);
+        $("svg").attr("aria-label", chartData.alt);
       }
+      const width = $("svg").attr("width");
+      const height = $("svg").attr("height");
+      if (width && height && !width.includes("%") && !height.includes("%")) {
+        const widthInt = parseInt(width);
+        const heightInt = parseInt(height);
+        if (widthInt > 0 && heightInt > 0) {
+          $("svg").attr("data-aspect-ratio", `${widthInt}/${heightInt}`);
+          $("svg").removeAttr("width");
+          $("svg").removeAttr("height");
+        }
+      }
+      chartData.svg = $.html();
     }
   }
 }
