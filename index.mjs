@@ -169,7 +169,11 @@ function readTransformResults() {
         const widthInt = parseInt(width);
         const heightInt = parseInt(height);
         if (widthInt > 0 && heightInt > 0) {
-          $("svg").attr("data-aspect-ratio", `${widthInt}/${heightInt}`);
+          const style = $("svg").attr("style");
+          $("svg").attr(
+            "style",
+            `${style ? style + ";" : ""}aspect-ratio:${widthInt}/${heightInt};`,
+          );
           $("svg").removeAttr("width");
           $("svg").removeAttr("height");
         }
