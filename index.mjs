@@ -174,6 +174,7 @@ function readTransformResults() {
             "style",
             `${style ? style + ";" : ""}aspect-ratio:${widthInt}/${heightInt};`,
           );
+          $("svg").attr("data-aspect-ratio", `${widthInt / heightInt}`);
           $("svg").removeAttr("width");
           $("svg").removeAttr("height");
         }
